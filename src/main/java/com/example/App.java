@@ -17,10 +17,17 @@ public class App
         try {
             System.out.println("Server in avvio!");
             ServerSocket server = new ServerSocket(8080);
+            
             while (true) {
                 Socket s = server.accept();
                 BufferedReader in = new BufferedReader(new InputStreamReader(s.getInputStream()));
                 PrintWriter out = new PrintWriter(s.getOutputStream());
+
+                String richiesta = in.readLine();
+                String riga[] = richiesta.split(" ");
+                String path = riga[1];
+                path = path.substring(1);
+                System.out.println("----" + path + "----");
 
                 do {
                     String line = in.readLine();
@@ -29,7 +36,7 @@ public class App
                         break;
                 } while (true);
 
-                sendFile(out);
+                sendFile(out, path);
                 
                 out.flush();
                 s.close();
@@ -43,7 +50,7 @@ public class App
         }  
     }
     
-    private static void sendFile(PrintWriter out) {
+    private static void sendFile(PrintWriter out, String file) {
         try {
             File myObj = new File("test.html");
             Scanner myReader = new Scanner(myObj);
@@ -61,6 +68,7 @@ public class App
                 out.println(data);
             }
             myReader.close();
+
         } catch (FileNotFoundException e) {
             out.println("HTTP/1.1 404 OK");
         }
