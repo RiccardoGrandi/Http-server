@@ -4,15 +4,13 @@ import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.file.Files;
 import java.util.Date;
-import java.util.Scanner;
 
 public class App 
 {
@@ -32,23 +30,36 @@ public class App
                 line = in.readLine();
                 String filePath = line.split(" ")[1];
 
+                System.out.println(filePath);
                 do {
                     line = in.readLine();
                     System.out.println(line);
                 } while (!line.isEmpty());
 
-                File file  = new File("htdocs" + filePath);
-                if (file.exists()) {
-                    sendBinaryFile(out, file);
-                } else {
-                    String msg = "File non trovato";
-                    out.writeBytes("HTTP/1.1 404 Not Found\n");
-                    out.writeBytes("Content-Length: " + msg.length() + "\n");
-                    out.writeBytes("Server: Java HTTP Server from Grandi: 1.0" + "\n");
-                    out.writeBytes("Date: " + new Date() + "\n");
-                    out.writeBytes("Content-Type: text/plain; charset=utf-8\n");
+                if (filePath.endsWith("/")) 
+                    filePath += "index.html";
+
+                int index = filePath.lastIndexOf('.');
+                if (index > 0) {               
+                    File file  = new File("htdocs" + filePath);
+                    if (file.exists()) {
+                        sendBinaryFile(out, file);
+                    } else {
+                        String msg = "File non trovato";
+                        out.writeBytes("HTTP/1.1 404 Not Found\n");
+                        out.writeBytes("Content-Length: " + msg.length() + "\n");
+                        out.writeBytes("Server: Java HTTP Server from Grandi: 1.0" + "\n");
+                        out.writeBytes("Date: " + new Date() + "\n");
+                        out.writeBytes("Content-Type: text/plain; charset=utf-8\n");
+                        out.writeBytes("\n");
+                        out.writeBytes(msg);
+                    }
+                }
+
+                else{
+                    out.writeBytes("HTTP/1.1 301\n");
+                    out.writeBytes("Location: "+filePath+"/\n");
                     out.writeBytes("\n");
-                    out.writeBytes(msg);
                 }
 
                 s.close();
